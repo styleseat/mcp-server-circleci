@@ -64,5 +64,136 @@ describe('JobsAPI', () => {
       expect(mockClient.get).toHaveBeenCalledTimes(2);
       expect(result).toHaveLength(2);
     });
+
+    it('should throw timeout error when timeout is reached', async () => {
+      const mockArtifacts = {
+        items: [{ path: 'test.xml', url: 'https://example.com/test.xml', node_index: 0, size: 1024 }],
+        next_page_token: 'token1'
+      };
+
+      vi.spyOn(mockClient, 'get').mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return mockArtifacts;
+      });
+
+      await expect(
+        jobsAPI.getJobArtifacts({
+          projectSlug: 'gh/org/repo',
+          jobNumber: 123,
+          options: { timeoutMs: 100 }
+        })
+      ).rejects.toThrow('Timeout reached after 100ms');
+    });
+
+    it('should throw max pages error when max pages limit reached', async () => {
+      const mockPage = {
+        items: [{ path: 'test.xml', url: 'https://example.com/test.xml', node_index: 0, size: 1024 }],
+        next_page_token: 'token1'
+      };
+
+      vi.spyOn(mockClient, 'get').mockResolvedValue(mockPage);
+
+      await expect(
+        jobsAPI.getJobArtifacts({
+          projectSlug: 'gh/org/repo',
+          jobNumber: 123,
+          options: { maxPages: 2 }
+        })
+      ).rejects.toThrow('Maximum number of pages (2) reached');
+    });
+
+    it('should throw schema validation error when API returns invalid data', async () => {
+      const invalidResponse = {
+        items: [
+          {
+            path: 'test.xml',
+            // missing required fields: url, node_index, size
+          }
+        ],
+        next_page_token: null
+      };
+
+      vi.spyOn(mockClient, 'get').mockResolvedValue(invalidResponse);
+
+      await expect(
+        jobsAPI.getJobArtifacts({
+          projectSlug: 'gh/org/repo',
+          jobNumber: 123
+        })
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('getWorkflowJobs', () => {
+    it('should throw timeout error when timeout is reached', async () => {
+      const mockJobs = {
+        items: [{
+          id: 'job-1',
+          status: 'success',
+          name: 'test-job',
+          job_number: 123,
+          type: 'build',
+          started_at: '2024-01-01T00:00:00Z',
+          stopped_at: '2024-01-01T00:01:00Z'
+        }],
+        next_page_token: 'token1'
+      };
+
+      vi.spyOn(mockClient, 'get').mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return mockJobs;
+      });
+
+      await expect(
+        jobsAPI.getWorkflowJobs({
+          workflowId: 'workflow-123',
+          options: { timeoutMs: 100 }
+        })
+      ).rejects.toThrow('Timeout reached after 100ms');
+    });
+
+    it('should throw max pages error when max pages limit reached', async () => {
+      const mockPage = {
+        items: [{
+          id: 'job-1',
+          status: 'success',
+          name: 'test-job',
+          job_number: 123,
+          type: 'build',
+          started_at: '2024-01-01T00:00:00Z',
+          stopped_at: '2024-01-01T00:01:00Z'
+        }],
+        next_page_token: 'token1'
+      };
+
+      vi.spyOn(mockClient, 'get').mockResolvedValue(mockPage);
+
+      await expect(
+        jobsAPI.getWorkflowJobs({
+          workflowId: 'workflow-123',
+          options: { maxPages: 2 }
+        })
+      ).rejects.toThrow('Maximum number of pages (2) reached');
+    });
+
+    it('should throw schema validation error when API returns invalid data', async () => {
+      const invalidResponse = {
+        items: [
+          {
+            // missing required field: id
+            job_number: 123
+          }
+        ],
+        next_page_token: null
+      };
+
+      vi.spyOn(mockClient, 'get').mockResolvedValue(invalidResponse);
+
+      await expect(
+        jobsAPI.getWorkflowJobs({
+          workflowId: 'workflow-123'
+        })
+      ).rejects.toThrow();
+    });
   });
 });
