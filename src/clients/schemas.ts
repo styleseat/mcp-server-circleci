@@ -102,6 +102,15 @@ const JobSchema = z.object({
   id: z.string(),
 });
 
+export const Artifact = z.object({
+  path: z.string(),
+  url: z.string(),
+  node_index: z.number(),
+  size: z.number(),
+});
+
+export type Artifact = z.infer<typeof Artifact>;
+
 const JobDetailsSchema = z.object({
   build_num: z.number(),
   steps: z.array(
