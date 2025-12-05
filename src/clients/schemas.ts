@@ -121,12 +121,19 @@ const JobDetailsSchema = z.object({
           index: z.number(),
           step: z.number(),
           failed: z.boolean().nullable(),
+          canceled: z.boolean().optional(),
+          status: z.string().optional(),
+          start_time: z.string().optional(),
+          end_time: z.string().optional(),
+          exit_code: z.number().nullable().optional(),
+          has_output: z.boolean().optional(),
         }),
       ),
     }),
   ),
   workflows: z.object({
     job_name: z.string(),
+    workflow_id: z.string().optional(),
   }),
 });
 
