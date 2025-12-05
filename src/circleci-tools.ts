@@ -36,6 +36,8 @@ import { getJobStepsTool } from './tools/getJobSteps/tool.js';
 import { getJobSteps } from './tools/getJobSteps/handler.js';
 import { getStepLogsTool } from './tools/getStepLogs/tool.js';
 import { getStepLogs } from './tools/getStepLogs/handler.js';
+import { listJobArtifactsTool } from './tools/listJobArtifacts/tool.js';
+import { listJobArtifacts } from './tools/listJobArtifacts/handler.js';
 
 // Define the tools with their configurations
 export const CCI_TOOLS = [
@@ -57,6 +59,7 @@ export const CCI_TOOLS = [
   listComponentVersionsTool,
   getJobStepsTool,
   getStepLogsTool,
+  listJobArtifactsTool,
 ];
 
 // Extract the tool names as a union type
@@ -90,4 +93,5 @@ export const CCI_HANDLERS = {
   list_component_versions: listComponentVersions,
   circleci_get_job_steps: getJobSteps,
   circleci_get_step_logs: getStepLogs,
+  circleci_list_job_artifacts: listJobArtifacts,
 } satisfies ToolHandlers;
