@@ -32,6 +32,8 @@ import { runRollbackPipeline } from './tools/runRollbackPipeline/handler.js';
 
 import { listComponentVersionsTool } from './tools/listComponentVersions/tool.js';
 import { listComponentVersions } from './tools/listComponentVersions/handler.js';
+import { getJobStepsTool } from './tools/getJobSteps/tool.js';
+import { getJobSteps } from './tools/getJobSteps/handler.js';
 
 // Define the tools with their configurations
 export const CCI_TOOLS = [
@@ -51,6 +53,7 @@ export const CCI_TOOLS = [
   analyzeDiffTool,
   runRollbackPipelineTool,
   listComponentVersionsTool,
+  getJobStepsTool,
 ];
 
 // Extract the tool names as a union type
@@ -82,4 +85,5 @@ export const CCI_HANDLERS = {
   analyze_diff: analyzeDiff,
   run_rollback_pipeline: runRollbackPipeline,
   list_component_versions: listComponentVersions,
+  circleci_get_job_steps: getJobSteps,
 } satisfies ToolHandlers;
