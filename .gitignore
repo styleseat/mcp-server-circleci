@@ -144,3 +144,6 @@ dist
 usage-data-*.csv
 .claude
 .DS_Store
+
+# Claude planning documents (ephemeral)
+docs/plans/
