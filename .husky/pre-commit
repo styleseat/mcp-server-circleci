@@ -47,8 +47,8 @@ PATTERNS=(
 FOUND_SECRETS=0
 
 for FILE in $STAGED_FILES; do
-  # Skip binary files and node_modules
-  if [ ! -f "$FILE" ] || file "$FILE" | grep -q "binary" || echo "$FILE" | grep -q "node_modules"; then
+  # Skip binary files, node_modules, and .husky (pre-commit hook patterns)
+  if [ ! -f "$FILE" ] || file "$FILE" | grep -q "binary" || echo "$FILE" | grep -Eq "(node_modules|\.husky/)"; then
     continue
   fi
 
