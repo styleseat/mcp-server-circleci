@@ -37,7 +37,9 @@ describe('recommendPromptTemplateTests handler', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const template = 'This is a test template with {{variable}}';
@@ -119,7 +121,9 @@ describe('recommendPromptTemplateTests handler', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const args = {
@@ -156,7 +160,9 @@ describe('recommendPromptTemplateTests handler', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const args = {
