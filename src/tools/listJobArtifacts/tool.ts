@@ -1,7 +1,7 @@
 import { listJobArtifactsInputSchema } from './inputSchema.js';
 
 export const listJobArtifactsTool = {
-  name: 'circleci_list_job_artifacts' as const,
+  name: 'list_job_artifacts' as const,
   description: `
     Lists all artifacts for a CircleCI job with metadata. Supports filtering by path pattern, file size, and parallel node. Returns artifact paths, sizes, and download URLs.
 

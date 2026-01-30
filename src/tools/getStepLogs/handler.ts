@@ -5,9 +5,12 @@ import {
   identifyProjectSlug,
 } from '../../lib/project-detection/index.js';
 import { getStepLogsInputSchema } from './inputSchema.js';
-import { getCircleCIClient, getCircleCIPrivateClient } from '../../clients/client.js';
+import {
+  getCircleCIClient,
+  getCircleCIPrivateClient,
+} from '../../clients/client.js';
 import mcpErrorOutput from '../../lib/mcpErrorOutput.js';
-import { paginateText } from '../../lib/step-logs/pagination.js';
+import { paginateText, tailText } from '../../lib/step-logs/pagination.js';
 
 export const getStepLogs: ToolCallback<{
   params: typeof getStepLogsInputSchema;
@@ -22,7 +25,7 @@ export const getStepLogs: ToolCallback<{
     stepStatus,
     offset,
     limit,
-    outputFormat,
+    tailLines,
   } = args.params ?? {};
 
   let projectSlug: string | undefined;
@@ -89,36 +92,76 @@ export const getStepLogs: ToolCallback<{
           stepId: action.step,
         });
 
-        const fullContent = `${logs.output}\n${logs.error}`.trim();
+        // Combine output and error, filtering empty parts
+        const parts = [logs.output, logs.error].filter(
+          (p) => p && p.trim().length > 0,
+        );
+        const fullContent = parts.join('\n').trim();
 
-        // Apply pagination
-        const paginated = paginateText(fullContent, { offset: offset ?? 0, limit: limit ?? 50000 });
-
+        // Use tailLines mode if specified, otherwise use offset/limit pagination
+        if (tailLines !== undefined) {
+          const tailed = tailText(fullContent, { lines: tailLines });
+          return {
+            stepId: `${action.step}-${action.index}`,
+            stepName,
+            status: action.failed ? 'failure' : 'success',
+            logs: {
+              content: tailed.content,
+              truncated: tailed.truncated,
+            },
+            lineInfo: {
+              totalLines: tailed.totalLines,
+              returnedLines: tailed.returnedLines,
+              mode: 'tail' as const,
+            },
+          };
+        } else {
+          const paginated = paginateText(fullContent, {
+            offset: offset ?? 0,
+            limit: limit ?? 50000,
+          });
+          return {
+            stepId: `${action.step}-${action.index}`,
+            stepName,
+            status: action.failed ? 'failure' : 'success',
+            logs: {
+              content: paginated.content,
+              truncated: paginated.pagination.hasMore,
+            },
+            pagination: paginated.pagination,
+          };
+        }
+      } catch (error) {
+        // Return error info instead of silently dropping the step
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         return {
           stepId: `${action.step}-${action.index}`,
           stepName,
-          status: action.failed ? 'failure' : 'success',
-          logs: {
-            content: paginated.content,
-            excerpt: false,
-          },
-          pagination: paginated.pagination,
+          status: 'error' as const,
+          error: `Failed to fetch logs: ${errorMessage}`,
         };
-      } catch (error) {
-        console.error(`Failed to fetch logs for ${stepName}:`, error);
-        return null;
       }
     }),
   );
 
-  const validSteps = stepsWithLogs.filter((s) => s !== null);
-
-  if (validSteps.length === 0) {
+  // All steps are returned (including those with errors)
+  if (stepsWithLogs.length === 0) {
     return {
       content: [
         {
           type: 'text' as const,
-          text: 'No logs found for the specified steps.',
+          text: JSON.stringify(
+            {
+              message: 'No steps matched the specified filters.',
+              filters: {
+                stepNames: stepNames ?? 'all',
+                stepStatus: stepStatus ?? 'all',
+              },
+            },
+            null,
+            2,
+          ),
         },
       ],
     };
@@ -128,7 +171,24 @@ export const getStepLogs: ToolCallback<{
     content: [
       {
         type: 'text' as const,
-        text: JSON.stringify({ steps: validSteps }, null, 2),
+        text: JSON.stringify(
+          {
+            jobNumber,
+            projectSlug,
+            steps: stepsWithLogs,
+            summary: {
+              totalSteps: stepsWithLogs.length,
+              successSteps: stepsWithLogs.filter((s) => s.status === 'success')
+                .length,
+              failureSteps: stepsWithLogs.filter((s) => s.status === 'failure')
+                .length,
+              errorSteps: stepsWithLogs.filter((s) => s.status === 'error')
+                .length,
+            },
+          },
+          null,
+          2,
+        ),
       },
     ],
   };

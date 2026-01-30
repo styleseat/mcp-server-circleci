@@ -1,15 +1,16 @@
 import { getStepLogsInputSchema } from './inputSchema.js';
 
 export const getStepLogsTool = {
-  name: 'circleci_get_step_logs' as const,
+  name: 'get_step_logs' as const,
   description: `
-    Fetches actual log output for specific steps in a CircleCI job. Supports filtering by step name/status and pagination for large logs.
+    Fetches log output for specific steps in a CircleCI job. Supports filtering by step name and status, with pagination for large logs.
+
+    IMPORTANT: For quickly diagnosing failures, use stepStatus='failure' and tailLines=500 to get just the last 500 lines of failed steps (where errors typically appear).
 
     Common use cases:
-    - Debugging specific test failures by examining logs
-    - Extracting error messages from failed steps
-    - Analyzing output from specific build steps
-    - Token-efficient log retrieval with pagination
+    - Debugging test failures by examining error output
+    - Extracting error messages from failed build steps
+    - Token-efficient retrieval of just the relevant log portions
 
     Input options for job identification (EXACTLY ONE required):
 
@@ -24,36 +25,32 @@ export const getStepLogsTool = {
     - workspaceRoot: The absolute path to the workspace root
     - gitRemoteURL: The URL of the git remote repository
 
-    Step Selection Options:
+    Step Selection:
     - stepNames: Array of exact step names to fetch logs for (e.g., ["Run Tests", "Build"])
-    - stepNamePattern: Glob or regex pattern to match step names (e.g., "test-*")
     - stepStatus: Filter by status - 'success', 'failure', or 'all' (default: 'all')
 
-    Pagination Options:
-    - offset: Character offset for pagination (default: 0)
-    - limit: Maximum characters to return per step (default: 50000)
+    Pagination (two modes):
 
-    Output Options:
-    - outputFormat: 'full', 'excerpt', or 'summary' (default: 'full')
-      * full: Complete logs with pagination
-      * excerpt: First/last portions with context
-      * summary: Metadata only
+    Character-based pagination:
+    - offset: Character offset (default: 0)
+    - limit: Maximum characters per step (default: 50000, max: 500000)
+
+    Line-based tail mode (recommended for error diagnosis):
+    - tailLines: Return only the last N lines (overrides offset/limit)
+      Use tailLines=200-500 for typical error diagnosis
 
     Returns:
     - steps: Array of step logs with:
       * stepId: Unique step identifier
       * stepName: Name of the step
       * status: 'success' or 'failure'
-      * logs: Object containing log content and excerpt flag
-      * pagination: Metadata for fetching more content
+      * logs: { content: string, truncated: boolean }
+      * pagination: { offset, limit, totalSize, hasMore }
 
     Recommended Workflow:
-    1. Use circleci_get_job_steps first to see available steps
-    2. Identify which steps you need logs for (typically failed steps)
-    3. Use this tool to fetch logs for those specific steps
-    4. Use pagination if logs are truncated
-
-    This is token-efficient as it only fetches logs you specifically request.
+    1. Use get_job_steps to see available steps and identify failures
+    2. Call this tool with stepStatus='failure' and tailLines=500
+    3. If more context needed, increase tailLines or use offset/limit pagination
   `,
   inputSchema: getStepLogsInputSchema,
 };

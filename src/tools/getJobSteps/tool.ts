@@ -1,7 +1,7 @@
 import { getJobStepsInputSchema } from './inputSchema.js';
 
 export const getJobStepsTool = {
-  name: 'circleci_get_job_steps' as const,
+  name: 'get_job_steps' as const,
   description: `
     Retrieves lightweight metadata for all steps in a CircleCI job. Returns step names, status, duration, and log sizes without fetching actual logs.
 
@@ -50,7 +50,7 @@ export const getJobStepsTool = {
     Recommended Workflow:
     1. Use this tool first to understand the job structure
     2. Review step statuses and log sizes
-    3. Use circleci_get_step_logs to fetch actual logs for specific steps
+    3. Use get_step_logs to fetch actual logs for specific steps
 
     This is a token-efficient approach as it only fetches metadata, not full logs.
   `,

@@ -3,6 +3,10 @@ export interface PaginationOptions {
   limit: number;
 }
 
+export interface TailOptions {
+  lines: number;
+}
+
 export interface PaginationResult {
   content: string;
   pagination: {
@@ -12,6 +16,13 @@ export interface PaginationResult {
     hasMore: boolean;
     nextOffset?: number;
   };
+}
+
+export interface TailResult {
+  content: string;
+  truncated: boolean;
+  totalLines: number;
+  returnedLines: number;
 }
 
 /**
@@ -64,5 +75,48 @@ export function paginateText(
       hasMore,
       nextOffset: hasMore ? actualEndPos : undefined,
     },
+  };
+}
+
+/**
+ * Get the last N lines of text content
+ * @param text Full text content
+ * @param options Tail options
+ * @returns Last N lines with metadata
+ */
+export function tailText(text: string, options: TailOptions): TailResult {
+  const { lines: requestedLines } = options;
+
+  if (!text || text.length === 0) {
+    return {
+      content: '',
+      truncated: false,
+      totalLines: 0,
+      returnedLines: 0,
+    };
+  }
+
+  // Split into lines, preserving empty lines
+  const allLines = text.split('\n');
+  const totalLines = allLines.length;
+
+  if (totalLines <= requestedLines) {
+    return {
+      content: text,
+      truncated: false,
+      totalLines,
+      returnedLines: totalLines,
+    };
+  }
+
+  // Get the last N lines
+  const tailLines = allLines.slice(-requestedLines);
+  const content = tailLines.join('\n');
+
+  return {
+    content,
+    truncated: true,
+    totalLines,
+    returnedLines: tailLines.length,
   };
 }
