@@ -131,21 +131,22 @@ workflows:
       - lint:
           requires:
             - build
-      - publish-release:
-          context: npm-registry-public
-          filters:
-            branches:
-              only: main
-          requires:
-            - build
-            - lint
-            - test
-      - publish-docker-image:
-          context: mcp-server-docker-publish
-          filters:
-            branches:
-              only: main
-          requires:
-            - build
-            - lint
-            - test
+      # Publishing disabled for StyleSeat fork - we don't publish to npm or Docker Hub
+      # - publish-release:
+      #     context: npm-registry-public
+      #     filters:
+      #       branches:
+      #         only: main
+      #     requires:
+      #       - build
+      #       - lint
+      #       - test
+      # - publish-docker-image:
+      #     context: mcp-server-docker-publish
+      #     filters:
+      #       branches:
+      #         only: main
+      #     requires:
+      #       - build
+      #       - lint
+      #       - test

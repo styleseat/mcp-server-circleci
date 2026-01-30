@@ -36,7 +36,9 @@ describe('createPromptTemplate handler', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const args = {
@@ -104,7 +106,9 @@ describe('createPromptTemplate handler', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const args = {

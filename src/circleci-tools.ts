@@ -32,6 +32,14 @@ import { runRollbackPipeline } from './tools/runRollbackPipeline/handler.js';
 
 import { listComponentVersionsTool } from './tools/listComponentVersions/tool.js';
 import { listComponentVersions } from './tools/listComponentVersions/handler.js';
+import { getJobStepsTool } from './tools/getJobSteps/tool.js';
+import { getJobSteps } from './tools/getJobSteps/handler.js';
+import { getStepLogsTool } from './tools/getStepLogs/tool.js';
+import { getStepLogs } from './tools/getStepLogs/handler.js';
+import { listJobArtifactsTool } from './tools/listJobArtifacts/tool.js';
+import { listJobArtifacts } from './tools/listJobArtifacts/handler.js';
+import { getArtifactContentTool } from './tools/getArtifactContent/tool.js';
+import { getArtifactContent } from './tools/getArtifactContent/handler.js';
 
 // Define the tools with their configurations
 export const CCI_TOOLS = [
@@ -51,6 +59,10 @@ export const CCI_TOOLS = [
   analyzeDiffTool,
   runRollbackPipelineTool,
   listComponentVersionsTool,
+  getJobStepsTool,
+  getStepLogsTool,
+  listJobArtifactsTool,
+  getArtifactContentTool,
 ];
 
 // Extract the tool names as a union type
@@ -82,4 +94,8 @@ export const CCI_HANDLERS = {
   analyze_diff: analyzeDiff,
   run_rollback_pipeline: runRollbackPipeline,
   list_component_versions: listComponentVersions,
+  get_job_steps: getJobSteps,
+  get_step_logs: getStepLogs,
+  list_job_artifacts: listJobArtifacts,
+  get_artifact_content: getArtifactContent,
 } satisfies ToolHandlers;

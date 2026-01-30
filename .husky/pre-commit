@@ -1,0 +1,82 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Secret Scanner - Prevents committing common secrets
+echo "🔒 Scanning for secrets..."
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# Secret patterns to detect
+PATTERNS=(
+  # API Keys and Tokens
+  "CIRCLECI_TOKEN"
+  "CIRCLE_TOKEN"
+  "GITHUB_TOKEN"
+  "GH_TOKEN"
+  "NPM_TOKEN"
+  "AWS_ACCESS_KEY"
+  "AWS_SECRET_KEY"
+
+  # CircleCI API Keys (format: circleci_[alphanumeric])
+  "circleci_[A-Za-z0-9]{32,}"
+
+  # GitHub Personal Access Tokens (format: ghp_, gho_, ghs_, ghu_, ghr_)
+  "gh[opusrv]_[A-Za-z0-9]{36,}"
+
+  # Generic API key patterns
+  "['\"]?api[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{20,}['\"]"
+  "['\"]?secret[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{20,}['\"]"
+  "['\"]?auth[_-]?token['\"]?\s*[:=]\s*['\"][^'\"]{20,}['\"]"
+
+  # Private keys
+  "BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY"
+  "BEGIN PGP PRIVATE KEY BLOCK"
+
+  # AWS Keys
+  "AKIA[0-9A-Z]{16}"
+
+  # Generic base64 secrets (long strings that might be tokens)
+  "['\"]?password['\"]?\s*[:=]\s*['\"][^'\"]{10,}['\"]"
+)
+
+FOUND_SECRETS=0
+
+for FILE in $STAGED_FILES; do
+  # Skip binary files, node_modules, and .husky (pre-commit hook patterns)
+  if [ ! -f "$FILE" ] || file "$FILE" | grep -q "binary" || echo "$FILE" | grep -Eq "(node_modules|\.husky/)"; then
+    continue
+  fi
+
+  for PATTERN in "${PATTERNS[@]}"; do
+    if grep -iHnE "$PATTERN" "$FILE" > /dev/null 2>&1; then
+      if [ $FOUND_SECRETS -eq 0 ]; then
+        echo "❌ Potential secrets detected!"
+        echo ""
+      fi
+      echo "  File: $FILE"
+      echo "  Pattern: $PATTERN"
+      grep -iHnE "$PATTERN" "$FILE" | head -n 2
+      echo ""
+      FOUND_SECRETS=1
+    fi
+  done
+done
+
+if [ $FOUND_SECRETS -eq 1 ]; then
+  echo "⚠️  Commit blocked: Potential secrets found in staged files."
+  echo ""
+  echo "If these are false positives, you have options:"
+  echo "  1. Add the file pattern to .gitignore"
+  echo "  2. Use CIRCLECI_TOKEN=\${CIRCLECI_TOKEN} instead of hardcoding"
+  echo "  3. Bypass this hook with: git commit --no-verify (⚠️  use carefully!)"
+  echo ""
+  exit 1
+fi
+
+echo "✅ No secrets detected"
+exit 0

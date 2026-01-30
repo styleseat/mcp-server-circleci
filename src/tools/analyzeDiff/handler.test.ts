@@ -21,7 +21,9 @@ describe('analyzeDiff', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -54,7 +56,9 @@ describe('analyzeDiff', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -103,7 +107,9 @@ describe('analyzeDiff', () => {
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -182,7 +188,9 @@ Rule 4: All functions must have JSDoc comments`,
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -242,7 +250,9 @@ Description: Avoid using 'any' type.`,
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -319,7 +329,9 @@ Description: Avoid using 'any' type.`,
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -402,7 +414,9 @@ Confidence Score: 0.92`,
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const mockArgs = {
@@ -447,7 +461,9 @@ Confidence Score: 0.85`,
     };
 
     vi.mocked(CircletClient).mockImplementation(
-      () => mockCircletInstance as any,
+      function () {
+        return mockCircletInstance as any;
+      },
     );
 
     const rawParams = {

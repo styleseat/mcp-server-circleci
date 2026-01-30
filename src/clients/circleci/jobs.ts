@@ -1,4 +1,4 @@
-import { Job } from '../schemas.js';
+import { Job, Artifact } from '../schemas.js';
 import { HTTPClient } from './httpClient.js';
 import { defaultPaginationOptions } from './index.js';
 import { z } from 'zod';
@@ -92,5 +92,69 @@ export class JobsAPI {
     } while (nextPageToken);
 
     return allJobs;
+  }
+
+  /**
+   * Get artifacts for a job with pagination support
+   * @param params Configuration parameters
+   * @param params.projectSlug The project slug (e.g., "gh/CircleCI-Public/api-preview-docs")
+   * @param params.jobNumber The number of the job
+   * @param params.options Optional configuration for pagination limits
+   * @param params.options.maxPages Maximum number of pages to fetch (default: 5)
+   * @param params.options.timeoutMs Timeout in milliseconds (default: 10000)
+   * @returns All artifacts for the job
+   */
+  async getJobArtifacts({
+    projectSlug,
+    jobNumber,
+    options = {},
+  }: {
+    projectSlug: string;
+    jobNumber: number;
+    options?: {
+      maxPages?: number;
+      timeoutMs?: number;
+    };
+  }): Promise<Artifact[]> {
+    const {
+      maxPages = defaultPaginationOptions.maxPages,
+      timeoutMs = defaultPaginationOptions.timeoutMs,
+    } = options;
+
+    const startTime = Date.now();
+    const allArtifacts: Artifact[] = [];
+    let nextPageToken: string | null = null;
+    let pageCount = 0;
+
+    const ArtifactResponseSchema = z.object({
+      items: z.array(Artifact),
+      next_page_token: z.string().nullable(),
+    });
+
+    do {
+      // Check timeout
+      if (Date.now() - startTime > timeoutMs) {
+        throw new Error(`Timeout reached after ${timeoutMs}ms`);
+      }
+
+      // Check page limit
+      if (pageCount >= maxPages) {
+        throw new Error(`Maximum number of pages (${maxPages}) reached`);
+      }
+
+      const params = nextPageToken ? { 'page-token': nextPageToken } : {};
+      const rawResult = await this.client.get<unknown>(
+        `/project/${projectSlug}/${jobNumber}/artifacts`,
+        params,
+      );
+
+      const result = ArtifactResponseSchema.parse(rawResult);
+
+      pageCount++;
+      allArtifacts.push(...result.items);
+      nextPageToken = result.next_page_token;
+    } while (nextPageToken);
+
+    return allArtifacts;
   }
 }

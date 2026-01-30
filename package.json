@@ -1,6 +1,6 @@
 {
   "name": "@circleci/mcp-server-circleci",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "description": "A Model Context Protocol (MCP) server implementation for CircleCI, enabling natural language interactions with CircleCI functionality through MCP-enabled clients",
   "type": "module",
   "access": "public",
@@ -35,35 +35,39 @@
     "prepublishOnly": "pnpm run build && pnpm run test:run",
     "bump:patch": "pnpm version patch --no-git-tag-version",
     "bump:minor": "pnpm version minor --no-git-tag-version",
-    "bump:major": "pnpm version major --no-git-tag-version"
+    "bump:major": "pnpm version major --no-git-tag-version",
+    "prepare": "husky"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.15.1",
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "chrono-node": "2.8.3",
     "csv-parse": "6.0.0",
     "date-fns": "4.1.0",
     "express": "^4.19.2",
+    "minimatch": "10.1.1",
     "parse-github-url": "^1.0.3",
-    "zod": "^3.24.2",
-    "zod-to-json-schema": "^3.24.3"
+    "zod": "^4.1.13",
+    "zod-to-json-schema": "^3.25.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.39.1",
     "@types/express": "5.0.3",
+    "@types/minimatch": "6.0.0",
     "@types/node": "^22",
     "@types/parse-github-url": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^9.21.0",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-prettier": "^5.2.3",
+    "husky": "9.1.7",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.2",
     "shx": "^0.4.0",
     "tsx": "^4.19.3",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.28.0",
-    "vitest": "^3.1.1"
+    "vitest": "^4.0.15"
   },
   "engines": {
     "node": ">=18.0.0"
